@@ -1,6 +1,7 @@
+import time
+
 from selenium import webdriver
 from selenium.webdriver.common import keys
-# from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
 import config
@@ -10,6 +11,7 @@ class SocialNetworkScraper:
     BASE_URL = f"http://{config.SOCIAL_NETWORK_HOST}:{config.SOCIAL_NETWORK_PORT}"
     LOGIN_URL = f"{BASE_URL}/auth/login"
     BLOG_URL = f"{BASE_URL}/user/blog"
+    REGISTER_URL = f"{BASE_URL}/auth/register"
 
     def __init__(self):
         self.driver = None
@@ -22,16 +24,37 @@ class SocialNetworkScraper:
             print(e.args)
 
     def social_network_login(self):
+        self.driver = self.social_network_register()
+        self.driver.get(self.LOGIN_URL)
+
+        username_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='username']")
+        username_elem.send_keys(config.SOCIAL_NETWORK_LOGIN)
+
+        password_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='password']")
+        password_elem.send_keys(config.SOCIAL_NETWORK_PASSWORD)
+
+        password_elem.send_keys(keys.Keys.ENTER)
+
+        return self.driver
+
+    def social_network_register(self):
         driver = self.create_driver()
-        driver.get(self.LOGIN_URL)
+        driver.get(self.REGISTER_URL)
 
         username_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='username']")
         username_elem.send_keys(config.SOCIAL_NETWORK_LOGIN)
 
+        email_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='email']")
+        email_elem.send_keys(config.SOCIAL_NETWORK_EMAIL)
+
         password_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='password']")
         password_elem.send_keys(config.SOCIAL_NETWORK_PASSWORD)
 
+        confirm_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='confirm_password']")
+        confirm_elem.send_keys(config.SOCIAL_NETWORK_PASSWORD)
+
         password_elem.send_keys(keys.Keys.ENTER)
+        time.sleep(2)
 
         return driver
 
@@ -49,5 +72,16 @@ class SocialNetworkScraper:
 
         create_post_elem = self.driver.find_element(By.XPATH, "//form/button[@type='submit']")
         create_post_elem.click()
+
+        time.sleep(2)
+
+        like_elem = self.driver.find_element(By.XPATH, "/html/body/div/div/div[1]/div[1]/div[2]/div/div[1]/a[1]")
+        like_elem.click()
+        time.sleep(1)
+
+        logout_elem = self.driver.find_element(By.XPATH, "//div[@class='collapse navbar-collapse']"
+                                                         "/ul[@class='navbar-nav ms-auto']"
+                                                         "/li[@class='nav-item me-2']/a")
+        logout_elem.click()
 
         return self.driver

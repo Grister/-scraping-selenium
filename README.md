@@ -20,14 +20,11 @@ cp env.example .env
 ### Chromedriver
 Download from official website proper version of chromedriver for your OS: https://chromedriver.chromium.org/downloads
 - Update path to `chromedriver` executable in env variable
-- Allow `chromedriver` to run on MacOS 
-```
-xattr -d com.apple.quarantine chromedriver
-```
+
 ### Run application
 
 Ensure, that `social-network` application is running
 ```
-cd scraping-selenium
+cd -scraping-selenium
 python3 app.py
 ```
