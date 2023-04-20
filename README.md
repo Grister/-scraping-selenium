@@ -4,7 +4,7 @@
 
 Clone repository
 ```
-git clone https://github.com/akushyn/scraping-selenium.git
+git clone https://github.com/Grister/-scraping-selenium.git
 ```
 
 Install dependencies
