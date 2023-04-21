@@ -5,6 +5,7 @@ from selenium.webdriver.common import keys
 from selenium.webdriver.common.by import By
 
 import config
+from decorators import social_login_required
 
 
 class SocialNetworkScraper:
@@ -13,8 +14,9 @@ class SocialNetworkScraper:
     BLOG_URL = f"{BASE_URL}/user/blog"
     REGISTER_URL = f"{BASE_URL}/auth/register"
 
-    def __init__(self):
-        self.driver = None
+    def __init__(self, driver=None):
+        self.driver = driver or self.create_driver()
+        self.is_logged_in = False
 
     def create_driver(self):
         try:
@@ -24,7 +26,7 @@ class SocialNetworkScraper:
             print(e.args)
 
     def social_network_login(self):
-        self.driver = self.social_network_register()
+        self.social_network_register()
         self.driver.get(self.LOGIN_URL)
 
         username_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='username']")
@@ -35,33 +37,30 @@ class SocialNetworkScraper:
 
         password_elem.send_keys(keys.Keys.ENTER)
 
-        return self.driver
+        self.is_logged_in = True
 
     def social_network_register(self):
-        driver = self.create_driver()
-        driver.get(self.REGISTER_URL)
+        self.driver.get(self.REGISTER_URL)
 
-        username_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='username']")
+        username_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='username']")
         username_elem.send_keys(config.SOCIAL_NETWORK_LOGIN)
 
-        email_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='email']")
+        email_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='email']")
         email_elem.send_keys(config.SOCIAL_NETWORK_EMAIL)
 
-        password_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='password']")
+        password_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='password']")
         password_elem.send_keys(config.SOCIAL_NETWORK_PASSWORD)
 
-        confirm_elem = driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='confirm_password']")
+        confirm_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='confirm_password']")
         confirm_elem.send_keys(config.SOCIAL_NETWORK_PASSWORD)
 
         password_elem.send_keys(keys.Keys.ENTER)
         time.sleep(2)
 
-        return driver
+        return self.driver
 
-    def social_network_add_post(self, title, content, login_required=True):
-        if login_required:
-            self.driver = self.social_network_login()
-
+    @social_login_required
+    def social_network_add_post(self, title, content):
         self.driver.get(self.BLOG_URL)
 
         title_elem = self.driver.find_element(By.XPATH, "//div[@class='form-group']/input[@id='title']")
